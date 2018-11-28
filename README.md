@@ -13,7 +13,7 @@ You will be prompted for a password to encrypt your private key after which the 
 
 2. To read balances of a specific token:
 ```bash
-renex get-balances <[ETH, DGX, TUSD, REN, ZRX, OMG]>
+renex get-balances <ETH/DGX/TUSD/REN/ZRX/OMG]>
 ```
 
 3. To open orders:
