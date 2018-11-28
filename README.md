@@ -21,3 +21,8 @@ renex get-balances <[ETH, DGX, TUSD, REN, ZRX, OMG]>
 renex open-order
 ```
 You will be prompted by the CLI for further details required to open the order.
+
+4. To cancel orders:
+```bash
+renex cancel-order <order-id>
+```

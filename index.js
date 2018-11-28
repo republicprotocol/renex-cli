@@ -114,8 +114,38 @@ async function main() {
 
             providerEngine.stop();
         }
+    } else if (process.argv[2] === 'cancel-order' && process.argv.length == 4) {
+        const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
+        const wallet = Wallet.fromV3(fs.readFileSync('encrypted_keystore.json').toString(), password, true);
+
+        const providerEngine = new ProviderEngine();
+        providerEngine.addProvider(new WalletSubprovider(wallet));
+        providerEngine.addProvider(new RpcSubprovider({
+            rpcUrl: `https://kovan.infura.io/${process.env.INFURA_KEY}`,
+        }));
+        // Start the engine manually since it does not start automatically
+        providerEngine.start();
+
+        if (require.main === module) {
+            console.log(`Provider was set up with public address: ${wallet.getAddress().toString("hex")}`);
+            // Stop the provider engine when we're done with the provider
+            var sdk = new RenExSDK(providerEngine, { network: "testnet", autoNormalizeOrders: true, storageProvider: "memory" });
+            var web3 = new Web3(providerEngine);
+            var accounts = await web3.eth.getAccounts();
+            // Set the account to use with the RenEx SDK
+            var mainAccount = accounts[0];
+            sdk.setAddress(mainAccount);
+
+            await sdk.cancelOrder(process.argv[3]);
+            console.log(`Successfully cancelled order`);
+
+            providerEngine.stop();
+        }
     } else {
         console.log(chalk.bold.red("\nInvalid argument!\n"))
     }
 }
-main()
+
+main().catch(function (error) {
+    console.error(error);
+});
