@@ -9,7 +9,6 @@ var os = require("os");
 var Wallet = require('ethereumjs-wallet');
 const WalletSubprovider = require("ethereumjs-wallet/provider-engine");
 
-const Web3 = require("web3");
 const ProviderEngine = require("web3-provider-engine");
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
