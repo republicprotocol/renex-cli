@@ -16,61 +16,12 @@ const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const { RenExSDK } = require("@renex/renex");
 
-async function init() {
-    var password1 = "";
-    var password2 = " ";
-    while (password1 !== password2) {
-        password1 = await promptly.password(chalk.bold.cyan('Enter your password: '));
-        password2 = await promptly.password(chalk.bold.cyan('Re-enter your password: '));
-    }
+const providerEngine = new ProviderEngine();
 
-    var key = Buffer.from(process.argv[3], 'hex');
-    var wallet = Wallet.fromPrivateKey(key);
-    createFile('encrypted_keystore.json', wallet.toV3String(password1), function (err) { });
-    console.log(chalk.bold.green("\nStored encrypted keystore in ./encrypted_keystore.json\n"))
-}
-
-async function getBalances() {
+async function setupSDK() {
     const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
     const wallet = Wallet.fromV3(fs.readFileSync('encrypted_keystore.json').toString(), password, true);
 
-    const providerEngine = new ProviderEngine();
-    providerEngine.addProvider(new WalletSubprovider(wallet));
-    providerEngine.addProvider(new RpcSubprovider({
-        rpcUrl: `https://kovan.infura.io/${process.env.INFURA_KEY}`,
-    }));
-    // Start the engine manually since it does not start automatically
-    providerEngine.start();
-
-    if (require.main === module) {
-        console.log(`Provider was set up with public address: ${wallet.getAddress().toString("hex")}`);
-        // Stop the provider engine when we're done with the provider
-        var sdk = new RenExSDK(providerEngine, { network: "testnet", autoNormalizeOrders: true, storageProvider: "memory" });
-        var web3 = new Web3(providerEngine);
-        var accounts = await web3.eth.getAccounts();
-        // Set the account to use with the RenEx SDK
-        var mainAccount = accounts[0];
-        sdk.setAddress(mainAccount);
-
-        var token = process.argv[3]
-        while (token !== "ETH" && token !== "DGX" && token !== "TUSD" && token !== "REN" && token !== "ZRX" && token !== "OMG") {
-            token = await promptly.prompt(chalk.bold.cyan('Enter a valid token [ETH, DGX, TUSD, REN, ZRX, OMG]: '));
-        }
-        console.log(`\n\nGetting balances for: ${mainAccount}`);
-
-        const balances = await sdk.fetchBalances([token]);
-
-        console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
-
-        providerEngine.stop();
-    }
-}
-
-async function openOrder() {
-    const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
-    const wallet = Wallet.fromV3(fs.readFileSync('encrypted_keystore.json').toString(), password, true);
-
-    const providerEngine = new ProviderEngine();
     providerEngine.addProvider(new WalletSubprovider(wallet));
     providerEngine.addProvider(new RpcSubprovider({
         rpcUrl: `https://kovan.infura.io/${process.env.INFURA_KEY}`,
@@ -86,7 +37,40 @@ async function openOrder() {
     // Set the account to use with the RenEx SDK
     var mainAccount = accounts[0];
     sdk.setAddress(mainAccount);
+    return sdk;
+}
 
+async function init() {
+    var password1 = "";
+    var password2 = " ";
+    while (password1 !== password2) {
+        password1 = await promptly.password(chalk.bold.cyan('Enter your password: '));
+        password2 = await promptly.password(chalk.bold.cyan('Re-enter your password: '));
+    }
+
+    var key = Buffer.from(process.argv[3], 'hex');
+    var wallet = Wallet.fromPrivateKey(key);
+    createFile('encrypted_keystore.json', wallet.toV3String(password1), function (err) { });
+    console.log(chalk.bold.green("\nStored encrypted keystore in ./encrypted_keystore.json\n"))
+}
+
+async function getBalances() {
+    const sdk = await setupSDK();
+    var token = process.argv[3]
+    while (token !== "ETH" && token !== "DGX" && token !== "TUSD" && token !== "REN" && token !== "ZRX" && token !== "OMG") {
+        token = await promptly.prompt(chalk.bold.cyan('Enter a valid token [ETH, DGX, TUSD, REN, ZRX, OMG]: '));
+    }
+    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
+
+    const balances = await sdk.fetchBalances([token]);
+
+    console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
+
+    providerEngine.stop();
+}
+
+async function openOrder() {
+    const sdk = await setupSDK();
     var token = ''
     while (token !== "DGX/ETH" && token !== "TUSD/ETH" && token !== "REN/ETH" && token !== "ZRX/ETH" && token !== "OMG/ETH") {
         token = await promptly.prompt(chalk.bold.cyan('Enter the token [DGX, TUSD, REN, ZRX, OMG]: '));
@@ -117,26 +101,7 @@ async function openOrder() {
 }
 
 async function cancelOrder() {
-    const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
-    const wallet = Wallet.fromV3(fs.readFileSync('encrypted_keystore.json').toString(), password, true);
-
-    const providerEngine = new ProviderEngine();
-    providerEngine.addProvider(new WalletSubprovider(wallet));
-    providerEngine.addProvider(new RpcSubprovider({
-        rpcUrl: `https://kovan.infura.io/${process.env.INFURA_KEY}`,
-    }));
-    // Start the engine manually since it does not start automatically
-    providerEngine.start();
-
-    console.log(`Provider was set up with public address: ${wallet.getAddress().toString("hex")}`);
-    // Stop the provider engine when we're done with the provider
-    var sdk = new RenExSDK(providerEngine, { network: "testnet", autoNormalizeOrders: true, storageProvider: "memory" });
-    var web3 = new Web3(providerEngine);
-    var accounts = await web3.eth.getAccounts();
-    // Set the account to use with the RenEx SDK
-    var mainAccount = accounts[0];
-    sdk.setAddress(mainAccount);
-
+    const sdk = await setupSDK();
     await sdk.cancelOrder(process.argv[3]);
     console.log(`Successfully cancelled order`);
 
