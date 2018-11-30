@@ -54,7 +54,7 @@ async function setupSDK() {
     return sdk;
 }
 
-async function init() {
+async function encrypt() {
     var password1 = "";
     var password2 = " ";
     while (password1 !== password2) {
@@ -68,14 +68,14 @@ async function init() {
     console.log(chalk.bold.green("\nStored encrypted keystore in ./encrypted_keystore.json\n"))
 }
 
-async function getBalances() {
-    const sdk = await setupSDK();
-    var token = process.argv[3]
-    while (token !== "ETH" && token !== "DGX" && token !== "TUSD" && token !== "REN" && token !== "ZRX" && token !== "OMG") {
-        token = await promptly.prompt(chalk.bold.cyan('Enter a valid token [ETH, DGX, TUSD, REN, ZRX, OMG]: '));
+async function getBalances(token) {
+    token = token.toUpperCase()
+    if (!["ETH", "DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
+        throw new Error("Invalid token");
     }
-    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
 
+    const sdk = await setupSDK();
+    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
     const balances = await sdk.fetchBalances([token]);
 
     console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
@@ -84,7 +84,6 @@ async function getBalances() {
 }
 
 async function openOrder(buyOrSell, token) {
-    const sdk = await setupSDK();
     token = token.toUpperCase()
     if (!["DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
         throw new Error("Invalid token");
@@ -97,6 +96,8 @@ async function openOrder(buyOrSell, token) {
         price: price,  // ETH for 1 REN
         volume: volume,          // REN
     };
+
+    const sdk = await setupSDK(true);
     var { traderOrder } = await sdk.openOrder(order);
     console.log(`Successfully opened order : ${traderOrder.id}`);
 
@@ -104,26 +105,36 @@ async function openOrder(buyOrSell, token) {
 }
 
 async function cancelOrder() {
-    const sdk = await setupSDK();
+    const sdk = await setupSDK(true);
     await sdk.cancelOrder(process.argv[3]);
     console.log(`Successfully cancelled order`);
 
     providerEngine.stop();
 }
 
+async function listOrders() {
+    const sdk = await setupSDK();
+    var orders = await sdk.fetchTraderOrders({ refresh: true });
+    orders.forEach(function (order) {
+        console.log("\n" + order.id + " >>> " + order.status);
+        console.log(JSON.stringify(order.orderInputs));
+    });
+    providerEngine.stop();
+}
+
 async function main() {
     switch (process.argv[2]) {
-        case "init":
+        case "encrypt":
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
-            await init();
+            await encrypt();
             break;
-        case "get-balances":
+        case "balance":
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
-            await getBalances();
+            await getBalances(process.argv[3]);
             break;
         case "buy":
         case "sell":
@@ -137,6 +148,9 @@ async function main() {
                 throw new Error("Invalid number of arguments");
             }
             await cancelOrder();
+            break;
+        case "list":
+            await listOrders();
             break;
         default:
             throw new Error(chalk.bold.red("\nInvalid argument!\n"));
