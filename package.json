@@ -2,7 +2,7 @@
   "name": "renex-cli",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "renex": "./index.js"
+    "renex": "src/index.js"
   },
   "dependencies": {
     "@renex/renex": "^0.2.4",
