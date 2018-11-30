@@ -74,7 +74,6 @@ async function getBalances(token) {
 }
 
 async function openOrder(buyOrSell, token) {
-    const sdk = await setupSDK();
     token = token.toUpperCase()
     if (!["DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
         throw new Error("Invalid token");
@@ -87,6 +86,8 @@ async function openOrder(buyOrSell, token) {
         price: price,  // ETH for 1 REN
         volume: volume,          // REN
     };
+
+    const sdk = await setupSDK(true);
     var { traderOrder } = await sdk.openOrder(order);
     console.log(`Successfully opened order : ${traderOrder.id}`);
 
@@ -94,7 +95,7 @@ async function openOrder(buyOrSell, token) {
 }
 
 async function cancelOrder() {
-    const sdk = await setupSDK();
+    const sdk = await setupSDK(true);
     await sdk.cancelOrder(process.argv[3]);
     console.log(`Successfully cancelled order`);
 
