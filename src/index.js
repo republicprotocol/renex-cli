@@ -74,8 +74,6 @@ async function getBalances(token) {
     const balances = await sdk.fetchBalances([token]);
 
     console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
-
-    providerEngine.stop();
 }
 
 async function openOrder(buyOrSell, token) {
@@ -95,16 +93,12 @@ async function openOrder(buyOrSell, token) {
     const sdk = await setupSDK(true);
     var { traderOrder } = await sdk.openOrder(order);
     console.log(`Successfully opened order : ${traderOrder.id}`);
-
-    providerEngine.stop();
 }
 
 async function cancelOrder() {
     const sdk = await setupSDK(true);
     await sdk.cancelOrder(process.argv[3]);
     console.log(`Successfully cancelled order`);
-
-    providerEngine.stop();
 }
 
 async function listOrders() {
@@ -114,42 +108,46 @@ async function listOrders() {
         console.log("\n" + order.id + " >>> " + order.status);
         console.log(JSON.stringify(order.orderInputs));
     });
-    providerEngine.stop();
 }
 
 async function main() {
-    switch (process.argv[2]) {
-        case "encrypt":
-            if (process.argv.length !== 4) {
-                throw new Error("Invalid number of arguments");
-            }
-            await encrypt();
-            break;
-        case "balance":
-            if (process.argv.length !== 4) {
-                throw new Error("Invalid number of arguments");
-            }
-            await getBalances(process.argv[3]);
-            break;
-        case "buy":
-        case "sell":
-            if (process.argv.length !== 4) {
-                throw new Error("Invalid number of arguments");
-            }
-            await openOrder(process.argv[2], process.argv[3]);
-            break;
-        case "cancel":
-            if (process.argv.length !== 4) {
-                throw new Error("Invalid number of arguments");
-            }
-            await cancelOrder();
-            break;
-        case "list":
-            await listOrders();
-            break;
-        default:
-            throw new Error(chalk.bold.red("\nInvalid argument!\n"));
+    try {
+        switch (process.argv[2]) {
+            case "encrypt":
+                if (process.argv.length !== 4) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await encrypt();
+                break;
+            case "balance":
+                if (process.argv.length !== 4) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await getBalances(process.argv[3]);
+                break;
+            case "buy":
+            case "sell":
+                if (process.argv.length !== 4) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await openOrder(process.argv[2], process.argv[3]);
+                break;
+            case "cancel":
+                if (process.argv.length !== 4) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await cancelOrder();
+                break;
+            case "list":
+                await listOrders();
+                break;
+            default:
+                throw new Error(chalk.bold.red("\nInvalid argument!\n"));
+        }
+    } catch (error) {
+        console.error(error);
     }
+    providerEngine.stop();
 }
 
 main().catch(function (error) {
