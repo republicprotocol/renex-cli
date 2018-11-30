@@ -120,7 +120,7 @@ async function main() {
             }
             await encrypt();
             break;
-        case "get-balances":
+        case "balance":
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
