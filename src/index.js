@@ -44,7 +44,7 @@ async function setupSDK() {
     return sdk;
 }
 
-async function init() {
+async function encrypt() {
     var password1 = "";
     var password2 = " ";
     while (password1 !== password2) {
@@ -113,11 +113,11 @@ async function listOrders() {
 
 async function main() {
     switch (process.argv[2]) {
-        case "init":
+        case "encrypt":
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
-            await init();
+            await encrypt();
             break;
         case "get-balances":
             if (process.argv.length !== 4) {
