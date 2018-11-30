@@ -122,7 +122,7 @@ async function main() {
             }
             await openOrder(process.argv[2], process.argv[3]);
             break;
-        case "cancel-order":
+        case "cancel":
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
