@@ -101,6 +101,16 @@ async function cancelOrder() {
     providerEngine.stop();
 }
 
+async function listOrders() {
+    const sdk = await setupSDK();
+    var orders = await sdk.fetchTraderOrders({ refresh: true });
+    orders.forEach(function (order) {
+        console.log("\n" + order.id + " >>> " + order.status);
+        console.log(JSON.stringify(order.orderInputs));
+    });
+    providerEngine.stop();
+}
+
 async function main() {
     switch (process.argv[2]) {
         case "init":
@@ -127,6 +137,9 @@ async function main() {
                 throw new Error("Invalid number of arguments");
             }
             await cancelOrder();
+            break;
+        case "list":
+            await listOrders();
             break;
         default:
             throw new Error(chalk.bold.red("\nInvalid argument!\n"));
