@@ -58,14 +58,14 @@ async function encrypt() {
     console.log(chalk.bold.green("\nStored encrypted keystore in ./encrypted_keystore.json\n"))
 }
 
-async function getBalances() {
-    const sdk = await setupSDK();
-    var token = process.argv[3]
-    while (token !== "ETH" && token !== "DGX" && token !== "TUSD" && token !== "REN" && token !== "ZRX" && token !== "OMG") {
-        token = await promptly.prompt(chalk.bold.cyan('Enter a valid token [ETH, DGX, TUSD, REN, ZRX, OMG]: '));
+async function getBalances(token) {
+    token = token.toUpperCase()
+    if (!["ETH", "DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
+        throw new Error("Invalid token");
     }
-    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
 
+    const sdk = await setupSDK();
+    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
     const balances = await sdk.fetchBalances([token]);
 
     console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
@@ -123,7 +123,7 @@ async function main() {
             if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
-            await getBalances();
+            await getBalances(process.argv[3]);
             break;
         case "buy":
         case "sell":
