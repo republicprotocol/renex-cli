@@ -14,6 +14,12 @@ const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const { RenExSDK } = require("@renex/renex");
 
+const options = {
+    network: "testnet",
+    autoNormalizeOrders: true,
+    storageProvider: "~/.config/renex-cli/data",
+}
+
 const providerEngine = new ProviderEngine();
 
 async function setupSDK() {
@@ -29,7 +35,7 @@ async function setupSDK() {
 
     console.log(`Provider was set up with public address: ${wallet.getAddress().toString("hex")}`);
     // Stop the provider engine when we're done with the provider
-    var sdk = new RenExSDK(providerEngine, { network: "testnet", autoNormalizeOrders: true, storageProvider: "memory" });
+    var sdk = new RenExSDK(providerEngine, options);
     var web3 = new Web3(providerEngine);
     var accounts = await web3.eth.getAccounts();
     // Set the account to use with the RenEx SDK
