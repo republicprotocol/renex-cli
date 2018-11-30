@@ -2,8 +2,6 @@
 
 var createFile = require('create-file');
 var chalk = require('chalk');
-var program = require('commander');
-var co = require('co');
 var promptly = require('promptly');
 var fs = require('fs');
 
