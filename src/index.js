@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var createFile = require('create-file');
 var chalk = require('chalk');
 var promptly = require('promptly');
 var fs = require('fs');
@@ -34,7 +33,7 @@ const providerEngine = new ProviderEngine();
 
 async function setupSDK() {
     const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
-    const wallet = Wallet.fromV3(fs.readFileSync('encrypted_keystore.json').toString(), password, true);
+    const wallet = Wallet.fromV3(fs.readFileSync(keystorePath).toString(), password, true);
 
     providerEngine.addProvider(new WalletSubprovider(wallet));
     providerEngine.addProvider(new RpcSubprovider({
@@ -64,8 +63,9 @@ async function encrypt() {
 
     var key = Buffer.from(process.argv[3], 'hex');
     var wallet = Wallet.fromPrivateKey(key);
-    createFile('encrypted_keystore.json', wallet.toV3String(password1), function (err) { });
-    console.log(chalk.bold.green("\nStored encrypted keystore in ./encrypted_keystore.json\n"))
+
+    fs.writeFileSync(keystorePath, wallet.toV3String(password1), function (err) { });
+    console.log(chalk.bold.green("\nStored encrypted keystore in " + keystorePath + "\n"))
 }
 
 async function getBalances(token) {
