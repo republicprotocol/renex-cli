@@ -23,33 +23,29 @@ if (!fs.existsSync(dataPath)) {
 
 const storagePath = path.join(dataPath, "data");
 const keystorePath = path.join(dataPath, "keystore.json");
-const options = {
-    network: "testnet",
-    autoNormalizeOrders: true,
-    storageProvider: storagePath,
-}
 
 const providerEngine = new ProviderEngine();
 
-async function setupSDK() {
-    const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
-    const wallet = Wallet.fromV3(fs.readFileSync(keystorePath).toString(), password, true);
-
-    providerEngine.addProvider(new WalletSubprovider(wallet));
+async function setupSDK(unlock) {
+    const walletString = fs.readFileSync(keystorePath).toString();
+    if (unlock) {
+        const password = await promptly.password(chalk.bold.cyan('Enter your password: '));
+        const wallet = Wallet.fromV3(walletString, password, true);
+        providerEngine.addProvider(new WalletSubprovider(wallet));
+    }
     providerEngine.addProvider(new RpcSubprovider({
         rpcUrl: `https://kovan.infura.io/${process.env.INFURA_KEY}`,
     }));
     // Start the engine manually since it does not start automatically
     providerEngine.start();
 
-    console.log(`Provider was set up with public address: ${wallet.getAddress().toString("hex")}`);
-    // Stop the provider engine when we're done with the provider
+    const options = {
+        network: "testnet",
+        autoNormalizeOrders: true,
+        storageProvider: storagePath,
+    }
     var sdk = new RenExSDK(providerEngine, options);
-    var web3 = new Web3(providerEngine);
-    var accounts = await web3.eth.getAccounts();
-    // Set the account to use with the RenEx SDK
-    var mainAccount = accounts[0];
-    sdk.setAddress(mainAccount);
+    sdk.setAddress(JSON.parse(walletString).address);
     return sdk;
 }
 
