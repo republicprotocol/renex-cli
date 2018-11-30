@@ -67,28 +67,17 @@ async function getBalances() {
     providerEngine.stop();
 }
 
-async function openOrder() {
+async function openOrder(buyOrSell, token) {
     const sdk = await setupSDK();
-    var token = ''
-    while (token !== "DGX/ETH" && token !== "TUSD/ETH" && token !== "REN/ETH" && token !== "ZRX/ETH" && token !== "OMG/ETH") {
-        token = await promptly.prompt(chalk.bold.cyan('Enter the token [DGX, TUSD, REN, ZRX, OMG]: '));
-        token = token + "/ETH"
-    }
-    var parity = ''
-    while (parity != 'buy' && parity !== 'sell') {
-        parity = await promptly.prompt(chalk.bold.cyan('Is this a buy order: (y/n)'));
-        if (parity === 'Y' || parity === 'y') {
-            parity = 'buy'
-        }
-        if (parity === 'N' || parity === 'n') {
-            parity = 'sell'
-        }
+    token = token.toUpperCase()
+    if (!["DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
+        throw new Error("Invalid token");
     }
     var price = await promptly.prompt(chalk.bold.cyan('Enter the price: '));
     var volume = await promptly.prompt(chalk.bold.cyan('Enter the volume: '));
     var order = {
-        symbol: token,
-        side: parity,         // buying REN for ETH
+        symbol: token + "/ETH",
+        side: buyOrSell,
         price: price,  // ETH for 1 REN
         volume: volume,          // REN
     };
@@ -120,11 +109,12 @@ async function main() {
             }
             await getBalances();
             break;
-        case "open-order":
-            if (process.argv.length !== 3) {
+        case "buy":
+        case "sell":
+            if (process.argv.length !== 4) {
                 throw new Error("Invalid number of arguments");
             }
-            await openOrder();
+            await openOrder(process.argv[2], process.argv[3]);
             break;
         case "cancel-order":
             if (process.argv.length !== 4) {
