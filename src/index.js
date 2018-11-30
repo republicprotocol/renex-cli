@@ -4,6 +4,8 @@ var createFile = require('create-file');
 var chalk = require('chalk');
 var promptly = require('promptly');
 var fs = require('fs');
+var path = require("path");
+var os = require("os");
 
 var Wallet = require('ethereumjs-wallet');
 const WalletSubprovider = require("ethereumjs-wallet/provider-engine");
@@ -14,10 +16,18 @@ const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const { RenExSDK } = require("@renex/renex");
 
+// Create our main data path
+const dataPath = path.join(os.homedir(), ".config/renex-cli");
+if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath);
+}
+
+const storagePath = path.join(dataPath, "data");
+const keystorePath = path.join(dataPath, "keystore.json");
 const options = {
     network: "testnet",
     autoNormalizeOrders: true,
-    storageProvider: "~/.config/renex-cli/data",
+    storageProvider: storagePath,
 }
 
 const providerEngine = new ProviderEngine();
