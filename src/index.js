@@ -63,6 +63,11 @@ async function encrypt() {
     console.log(chalk.bold.green("\nStored encrypted keystore in " + keystorePath + "\n"))
 }
 
+async function load(filePath) {
+    fs.copyFileSync(filePath, keystorePath, console.error);
+    console.log(chalk.bold.green("\nSuccessfully loaded keystore to:" + keystorePath + "\n"))
+}
+
 async function getBalances(token) {
     token = token.toUpperCase()
     if (!["ETH", "DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
@@ -113,6 +118,12 @@ async function listOrders() {
 async function main() {
     try {
         switch (process.argv[2]) {
+            case "load":
+                if (process.argv.length !== 4) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await load(process.argv[3]);
+                break;
             case "encrypt":
                 if (process.argv.length !== 4) {
                     throw new Error("Invalid number of arguments");
