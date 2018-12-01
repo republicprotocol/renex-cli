@@ -59,7 +59,7 @@ async function encrypt() {
     var key = Buffer.from(process.argv[3], 'hex');
     var wallet = Wallet.fromPrivateKey(key);
 
-    fs.writeFileSync(keystorePath, wallet.toV3String(password1), function (err) { });
+    fs.writeFileSync(keystorePath, wallet.toV3String(password1), console.error);
     console.log(chalk.bold.green("\nStored encrypted keystore in " + keystorePath + "\n"))
 }
 
