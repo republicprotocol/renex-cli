@@ -1,28 +1,67 @@
 # RenEx CLI (RenHack)
 
+## Setup
+
 To get started, clone this repository and type
 ```bash
-sudo npm install -g
+npm install -g
 ```
 
-1. To initialize with your private key:
-```bash
-renex init <private-key>
-```
-You will be prompted for a password to encrypt your private key after which the encrypted keystore will be stored in `./encrypted_keystore.json`.
+## Init
 
-2. To read balances of a specific token:
+You can either setup the CLI to use your pre-existing `keystore.json` file by running:
+
 ```bash
-renex get-balances <ETH/DGX/TUSD/REN/ZRX/OMG]>
+renex load /path/to/your/keystore.json
 ```
 
-3. To open orders:
+Or you can setup the CLI to use your private key by running:
+
 ```bash
-renex open-order
+renex encrypt <private-key>
 ```
+
+You will be prompted for a password to encrypt your private key after which the encrypted keystore will be stored in `~/.config/renex-cli/keystore.json`.
+
+
+## Usage
+
+### Reading Balances
+
+To read balances of a specific token:
+
+```bash
+renex balance <ETH/DGX/TUSD/REN/ZRX/OMG>
+```
+
+### Opening Orders
+
+To open buy orders:
+
+```bash
+renex buy <ETH/DGX/TUSD/REN/ZRX/OMG>
+```
+
+To open sell orders:
+
+```bash
+renex sell <ETH/DGX/TUSD/REN/ZRX/OMG>
+```
+
 You will be prompted by the CLI for further details required to open the order.
 
-4. To cancel orders:
+### Listing Orders
+
+To list previously opened orders:
+
 ```bash
-renex cancel-order <order-id>
+renex list
+```
+
+### Cancelling Orders
+
+To cancel orders:
+
+```bash
+renex cancel <order-id>
 ```
