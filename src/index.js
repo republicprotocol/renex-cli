@@ -85,6 +85,22 @@ async function getBalances(token) {
     console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
 }
 
+async function withdraw(amount, token) {
+    token = validateToken(token);
+    const sdk = await setupSDK(true);
+    const depositResult = await sdk.withdraw(amount, token);
+    console.log(`Submitted ${token} withdrawal transaction. Txhash: ${depositResult.balanceAction.txHash}`);
+    await getBalances(token);
+}
+
+async function deposit(amount, token) {
+    token = validateToken(token);
+    const sdk = await setupSDK(true);
+    const depositResult = await sdk.deposit(amount, token);
+    console.log(`Submitted ${token} deposit transaction. Txhash: ${depositResult.balanceAction.txHash}`);
+    await getBalances(token);
+}
+
 async function openOrder(buyOrSell, token) {
     token = validateToken(token);
     var price = await promptly.prompt(chalk.bold.cyan('Enter the price: '));
@@ -158,6 +174,18 @@ async function main() {
                     throw new Error("Invalid number of arguments");
                 }
                 await cancelOrder();
+                break;
+            case "deposit":
+                if (process.argv.length !== 5) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await deposit(process.argv[3], process.argv[4]);
+                break;
+            case "withdraw":
+                if (process.argv.length !== 5) {
+                    throw new Error("Invalid number of arguments");
+                }
+                await withdraw(process.argv[3], process.argv[4]);
                 break;
             case "list":
                 if (process.argv[3].toLowerCase() === "orders") {
