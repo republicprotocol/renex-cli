@@ -21,6 +21,7 @@
     "create-file": "^1.0.1",
     "ethereumjs-wallet": "^0.6.2",
     "file-encryptor": "^0.1.1",
+    "moment": "^2.22.2",
     "promptly": "^3.0.3"
   }
 }
