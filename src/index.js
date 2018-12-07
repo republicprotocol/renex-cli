@@ -68,12 +68,16 @@ async function load(filePath) {
     console.log(chalk.bold.green("\nSuccessfully loaded keystore to:" + keystorePath + "\n"))
 }
 
-async function getBalances(token) {
-    token = token.toUpperCase()
+function validateToken(token) {
+    token = token.toUpperCase();
     if (!["ETH", "DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
         throw new Error("Invalid token");
     }
+    return token;
+}
 
+async function getBalances(token) {
+    token = validateToken(token);
     const sdk = await setupSDK();
     console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
     const balances = await sdk.fetchBalances([token]);
@@ -82,10 +86,7 @@ async function getBalances(token) {
 }
 
 async function openOrder(buyOrSell, token) {
-    token = token.toUpperCase()
-    if (!["DGX", "TUSD", "REN", "ZRX", "OMG"].includes(token)) {
-        throw new Error("Invalid token");
-    }
+    token = validateToken(token);
     var price = await promptly.prompt(chalk.bold.cyan('Enter the price: '));
     var volume = await promptly.prompt(chalk.bold.cyan('Enter the volume: '));
     var order = {
