@@ -13,7 +13,7 @@
     "renex": "src/index.js"
   },
   "dependencies": {
-    "@renex/renex": "^0.3.1",
+    "@renex/renex": "^0.3.2",
     "chalk": "^2.4.1",
     "co": "^4.6.0",
     "co-prompt": "^1.0.0",
