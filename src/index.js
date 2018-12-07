@@ -13,6 +13,7 @@ const ProviderEngine = require("web3-provider-engine");
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const { RenExSDK } = require("@renex/renex");
+const { naturalTime } = require("./timeago");
 
 // Create our main data path
 const dataPath = path.join(os.homedir(), ".config/renex-cli");
@@ -79,10 +80,13 @@ function validateToken(token) {
 async function getBalances(token) {
     token = validateToken(token);
     const sdk = await setupSDK();
-    console.log(`\n\nGetting balances for: ${sdk.getAddress()}`);
+    console.log(`\nRetrieving balances for: ${sdk.getAddress()}`);
     const balances = await sdk.fetchBalances([token]);
 
-    console.log(chalk.bold.green(`\nToken balance: ${JSON.stringify(balances.get(token))}`));
+    console.log(chalk.bold.green(`\n${token} balance`));
+    console.log(`Free: ${balances.get(token).free.toString()} ${token}`);
+    console.log(`Used: ${balances.get(token).used.toString()} ${token}`);
+    console.log(`Non-deposited: ${balances.get(token).nondeposited.toString()} ${token}`);
 }
 
 async function withdraw(amount, token) {
@@ -127,8 +131,16 @@ async function listOrders() {
     const sdk = await setupSDK();
     var orders = await sdk.fetchTraderOrders({ refresh: true });
     orders.forEach(function (order) {
-        console.log("\n" + order.id + " >>> " + order.status);
-        console.log(JSON.stringify(order.orderInputs));
+        var status;
+        if (order.status === "OPEN") {
+            status = chalk.green(order.status);
+        } else {
+            status = chalk.red(order.status);
+        }
+        console.log(`\n${status} ${chalk.bold(order.id)}`);
+        Object.keys(order.orderInputs).forEach(function (key) {
+            console.log(`${key}: ${order.orderInputs[key]}`);
+        })
     });
 }
 
@@ -136,8 +148,15 @@ async function listBalances() {
     const sdk = await setupSDK();
     var balanceActions = await sdk.fetchBalanceActions({ refresh: true });
     balanceActions.forEach(function (balanceAction) {
-        console.log(`\n${balanceAction.action} ${balanceAction.amount} ${balanceAction.token} >>> ${balanceAction.status}`);
-        console.log(JSON.stringify(balanceAction));
+        var status;
+        if (balanceAction.status === "done") {
+            status = chalk.green(balanceAction.status.toUpperCase());
+        } else {
+            status = chalk.red(balanceAction.status.toUpperCase());
+        }
+        console.log(`\n${status} ${balanceAction.action} ${balanceAction.amount} ${balanceAction.token}`);
+        console.log(`Submitted ${naturalTime(balanceAction.time, { message: "Just now", suffix: "ago", countDown: false })}`);
+        console.log(`Txhash: ${balanceAction.txHash}`);
     });
 }
 
