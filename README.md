@@ -34,6 +34,20 @@ To read balances of a specific token:
 renex balance <ETH/DGX/TUSD/REN/ZRX/OMG>
 ```
 
+### Depositing and Withdrawing
+
+To deposit:
+
+```bash
+renex deposit <amount> <ETH/DGX/TUSD/REN/ZRX/OMG>
+```
+
+To withdraw:
+
+```bash
+renex withdraw <amount> <ETH/DGX/TUSD/REN/ZRX/OMG>
+```
+
 ### Opening Orders
 
 To open buy orders:
@@ -55,7 +69,15 @@ You will be prompted by the CLI for further details required to open the order.
 To list previously opened orders:
 
 ```bash
-renex list
+renex list orders
+```
+
+### Listing Balance Actions
+
+To list previous balance actions:
+
+```bash
+renex list balance
 ```
 
 ### Cancelling Orders
