@@ -116,6 +116,15 @@ async function listOrders() {
     });
 }
 
+async function listBalances() {
+    const sdk = await setupSDK();
+    var balanceActions = await sdk.fetchBalanceActions({ refresh: true });
+    balanceActions.forEach(function (balanceAction) {
+        console.log(`\n${balanceAction.action} ${balanceAction.amount} ${balanceAction.token} >>> ${balanceAction.status}`);
+        console.log(JSON.stringify(balanceAction));
+    });
+}
+
 async function main() {
     try {
         switch (process.argv[2]) {
@@ -151,7 +160,13 @@ async function main() {
                 await cancelOrder();
                 break;
             case "list":
-                await listOrders();
+                if (process.argv[3].toLowerCase() === "orders") {
+                    await listOrders();
+                } else if (process.argv[3].toLowerCase() === "balance") {
+                    await listBalances();
+                } else {
+                    console.error(`Invalid command: ${process.argv[3]}`);
+                }
                 break;
             default:
                 throw new Error(chalk.bold.red("\nInvalid argument!\n"));
